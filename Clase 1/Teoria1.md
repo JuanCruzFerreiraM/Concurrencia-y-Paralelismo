@@ -1,68 +1,68 @@
 # Concurrencia
 
-## Introduccion
-(Las paginas numeradas petenecen a la version resumida de las filminas).
+## Introducción
+
+(Las páginas numeradas pertenecen a la versión resumida de las filminas).
 
 Cosas que suceden al mismo tiempo.
-Resolver un problema mediante varios procesos que suceden al mismo tiempo o se van turnando, pero no siguen un orden cronologico o especifico.
+Resolver un problema mediante varios procesos que suceden al mismo tiempo o se van turnando, pero no siguen un orden cronológico o específico.
 
-- Nos permite reducir tiempo de ejecucion (en ciertos casos)
-- Suele permitir reducir el codigo.
- 
-Acarrea ademas una serie de dificultas a la hora de implementarlas(ver en la  filimina de la clase 1, pagina 7)
+- Nos permite reducir tiempo de ejecución (en ciertos casos).
+- Suele permitir reducir el código.
 
-Al introducir arquitecturas multi-core o clusters permite que la solucion ademas de concurrente sea paralela y por tanto ahi si los procesos se ejecutan
-al mismo tiempo en diferentes cores o computadoras. Algunas de las dificultas se agravan en este caso. Se agrega el tratamiento de fallos. 
+Acarrea además una serie de dificultades a la hora de implementarlas (ver en la filmina de la clase 1, página 7).
 
-Definicion mas tecnica de concurrencia en pagina 8 de la clase 1. 
+Al introducir arquitecturas multi-core o clusters permite que la solución además de concurrente sea paralela y por tanto ahí sí los procesos se ejecutan al mismo tiempo en diferentes cores o computadoras. Algunas de las dificultades se agravan en este caso. Se agrega el tratamiento de fallos.
 
-***Proceso***: Un proceso por el momento sera un elemento computacional que ejecuta un flujo de control (pedazos de codigo secuencial).
+Definición más técnica de concurrencia en página 8 de la clase 1.
 
-***Programa concurrente***: Procesos que trabajan "simultaneamente" para resolver un mismo problema y/o utilizar recursos compartidos. 
+**Proceso**: Un proceso por el momento será un elemento computacional que ejecuta un flujo de control (pedazos de código secuencial).
+
+**Programa concurrente**: Procesos que trabajan "simultáneamente" para resolver un mismo problema y/o utilizar recursos compartidos.
 
 ### Comportamientos de procesos
 
-- Forma ***independiente***: se ejecuta independientemente del resto, no se comunican, no comparten recursos, etc. No es relevante
+- Forma **independiente**: se ejecuta independientemente del resto, no se comunican, no comparten recursos, etc. No es relevante.
 
-- ***Competencia***: los procesos compiten por usar un cierto recurso compartido en un cierto momento, muy presente en sistemas operativos.
+- **Competencia**: los procesos compiten por usar un cierto recurso compartido en un cierto momento, muy presente en sistemas operativos.
 
-- ***Cooperacion***: los procesos cooperan para cada uno resolver  una parte del problema y entre todos resolver dar una solcion completa. Requieren de *comunicacion* y *sincronizacion*.
+- **Cooperación**: los procesos cooperan para cada uno resolver una parte del problema y entre todos dar una solución completa. Requieren de *comunicación* y *sincronización*.
 
 Pueden suceder los tres al mismo tiempo.
 
->La programacion concurrente es no determinista, para un conjunto de entradas la salida no siempre es la misma.
+> La programación concurrente es no determinista, para un conjunto de entradas la salida no siempre es la misma.
 
-### Por que necesitamos programacion concurrente
+### Por qué necesitamos programación concurrente
 
-Se comenzo a utilizar en aplicaciones cientificas.
+Se comenzó a utilizar en aplicaciones científicas.
 
-Hoy en dia, usamos multi-core, esto al no poder reducir el tiempo de reloj, nos  permite tener aplicaciones que se ejecuten mucho mas rapido.
+Hoy en día, usamos multi-core, esto al no poder reducir el tiempo de reloj, nos permite tener aplicaciones que se ejecuten mucho más rápido.
 
-Es mucho mas natural pensar soluciones concurrentes.
+Es mucho más natural pensar soluciones concurrentes.
 
-### Objetivos 
+### Objetivos
 
-Mirar pagina 17 de la clase 1.
+Mirar página 17 de la clase 1.
 
 ## Procesos e Hilos
 
-Los ***procesos*** tienen su propio espacio de direcciones y recursos,  no accede al espacio de otros procesos (procesos del OS). Se usan principalmente en memoria distribuida.
+Los **procesos** tienen su propio espacio de direcciones y recursos, no acceden al espacio de otros procesos (procesos del OS). Se usan principalmente en memoria distribuida.
 
-***Threads*** o ***hilos***: no tienen su propio espacio de direcciones, forman parte de un proceso, tienen acceso al espacio de direcciones de el proceso que los creo. Mayormente usados en memoria compartida.
+**Threads** o **hilos**: no tienen su propio espacio de direcciones, forman parte de un proceso, tienen acceso al espacio de direcciones del proceso que los creó. Mayormente usados en memoria compartida.
 
 ## Conceptos de concurrencia
 
-La ***comunicacion*** indica el modo en el cual los procesos se organizan y trasmiten sus datos. Para ellos necesitamos protocolos. Principalmente de dos formas
+La **comunicación** indica el modo en el cual los procesos se organizan y transmiten sus datos. Para ello necesitamos protocolos. Principalmente de dos formas:
 
 - *Memoria Compartida* (mismo espacio de direcciones, debemos manejar el acceso a esa memoria).
 - *Pasaje de mensajes* (usualmente no tenemos el mismo espacio de direcciones).
 
-La ***sincronizacion*** es la posecion de informacion de otro proceso para coordinar actividades. Dos formas:
+La **sincronización** es la posesión de información de otro proceso para coordinar actividades. Dos formas:
 
-- *exclusion mutua*: recurso compartido, asegurar que dos procesos no trabajen sobre el mismo recurso ( util principalmente en MC ).
-- *condicion*: un proceso puede demorarse hasta que cierta condicion se cumpla.
+- *Exclusión mutua*: recurso compartido, asegurar que dos procesos no trabajen sobre el mismo recurso (útil principalmente en MC).
+- *Condición*: un proceso puede demorarse hasta que cierta condición se cumpla.
 
-***Interferencia***: una cierta accion de un proceso que invalida las supociones de otros procesos. Ver ejemplo en pagina 22, es un cambio del contexto con el trabaja cierto proceso que invalida su operacion. (El ejemplo usa una division con cero).
+**Interferencia**: una cierta acción de un proceso que invalida las suposiciones de otros procesos. Ver ejemplo en página 22, es un cambio del contexto con el que trabaja cierto proceso que invalida su operación. (El ejemplo usa una división por cero).
 
 ### Manejo de recursos compartidos
 
@@ -70,47 +70,46 @@ Mayormente se hace entre los procesos. Se puede solucionar con un administrador.
 
 La idea es que el acceso a los recursos sea equilibrado (fairness).
 
-No queremos tener posibilidad de **inanicion** (proceso que nunca accede) ni tampoco de **overloading** no queremos darle a un proceso mas tareas de las que es capaz de resolver.
+No queremos tener posibilidad de **inanición** (proceso que nunca accede) ni tampoco de **sobrecarga** (no queremos darle a un proceso más tareas de las que es capaz de resolver).
 
-***Deadlock***: dos o mas procesos son bloqueados porque necesitan un proceso que tiene el otro y ese otro necesita el recurso que tengo yo. Ninguno libera el recurso que necesita el otro porque para liberar debemos tener el otro recurso. No debe existir la posibilidad de deadlock. (Condiciones en el pdf).
+**Deadlock**: dos o más procesos son bloqueados porque necesitan un recurso que tiene el otro y ese otro necesita el recurso que tengo yo. Ninguno libera el recurso que necesita el otro porque para liberar debemos tener el otro recurso. No debe existir la posibilidad de deadlock. (Condiciones en el pdf).
 
-> Ver problemas de la programacion concurrente en la pagina 26 de la clase.
+> Ver problemas de la programación concurrente en la página 26 de la clase.
 
 ## Clases de instrucciones
 
-*skip*: no hace nada, se usa para completar estructuras. Util en while loops que no hacen nada.
+*skip*: no hace nada, se usa para completar estructuras. Útil en while loops que no hacen nada.
 
-Tenemos *sentencias de alternativas multiples*. Se evaluan todas las condiciones, si una o mas son verdaderas, se elige aleatoriamente uno y se ejecuta. No es determinista y es muy util para si nos da igual cualquiera sea la salida y no tenemos prioridades de ejecucion. Si todas son falsas no ejecuta nada.
+Tenemos *sentencias de alternativas múltiples*. Se evalúan todas las condiciones, si una o más son verdaderas, se elige aleatoriamente una y se ejecuta. No es determinista y es muy útil para si nos da igual cualquiera sea la salida y no tenemos prioridades de ejecución. Si todas son falsas no ejecuta nada.
 
-*Sentencias alternativa iterativa multiple*: evalua todas las condiciones, ejecuta alguna de las verdaderas de forma aleatoria, repite el proceso, hasta que sean todas falsas. En la clase se usa alternativamente do o while para representar esto.
+*Sentencias alternativas iterativas múltiples*: evalúa todas las condiciones, ejecuta alguna de las verdaderas de forma aleatoria, repite el proceso, hasta que sean todas falsas. En la clase se usa alternativamente do o while para representar esto.
 
-*Process*: nos permite declarar un proceso, podemos usar cuantificadores
+*Process*: nos permite declarar un proceso, podemos usar cuantificadores:
+
+```{pascal}
+process A {i = 1 to n} {sentencias} //tendremos procesos A1...An
 ```
-process A {i = 1 to n} {sentecias} //tendremos procesos A1...An
-```
 
-*co* nos permite hacer algo concurrente dentro de unproceso secuencial. Sintaxis adecuada en las filminas.
+*co* nos permite hacer algo concurrente dentro de un proceso secuencial. Sintaxis adecuada en las filminas.
 
-La diferencia entre ellas esque el `process` se ejecuta en background minetras que `co` esespera a que los procesos creados terminen.
+La diferencia entre ellas es que el `process` se ejecuta en background mientras que `co` espera a que los procesos creados terminen.
 
 ### Definiciones
 
-***Estado***: conjunto de datos en memoria en registro mas la informacion de memoria compartida en un cierto instante de tiempo del proceso.
+**Estado**: conjunto de datos en memoria en registro más la información de memoria compartida en un cierto instante de tiempo del proceso.
 
-***Accion Atomica***: realiza una transformacion de estado indivisible, estados intermedios que no son visibles.
+**Acción Atómica**: realiza una transformación de estado indivisible, estados intermedios que no son visibles.
 
-***Intercalado***: intercalamos acciones atomicas de diferentes procesos.
+**Intercalado**: intercalamos acciones atómicas de diferentes procesos.
 
-***Historia o Trace***: Conjunto de estados en el ciclo de vida del programa. Hay validas y hay invalidas dependiendo del resultado que queremos. Debemos evitar las historias incorrectas, para eso usamos sincronizacion. 
+**Historia o Trace**: Conjunto de estados en el ciclo de vida del programa. Hay válidas y hay inválidas dependiendo del resultado que queremos. Debemos evitar las historias incorrectas, para eso usamos sincronización.
 
-***accion atomica de grano fino***: ya es atomica de por si, no debemos hacer nada. Sentencias de maquina
+**Acción atómica de grano fino**: ya es atómica de por sí, no debemos hacer nada. Sentencias de máquina.
 
-***acccion atomica de grano gruesa***: queremos que una cierta accion se comporte como atomica, debemos programarlo para que asi sea.
+**Acción atómica de grano grueso**: queremos que una cierta acción se comporte como atómica, debemos programarlo para que así sea.
 
 ---
 
- > Ver propiedad de a lo sumo una vez, sirve para ejecutar cosas como si fuesen acciones atomicas.
+> Ver propiedad de a lo sumo una vez, sirve para ejecutar cosas como si fuesen acciones atómicas.
 
-Para hacer sincronizacion por exclusion mutua usamos sentencias `<await (boolean condition) instructions>` o `<x = x+1; y = y + 1>` (por ahora). Podemos usarla para condicion si no le ponemos instrucciones. La primera es condicional la segundo es incondicional, la segunda es la que permita implementar exclusion mutua.
-
-
+Para hacer sincronización por exclusión mutua usamos sentencias `<await (boolean condition) instructions>` o `<x = x+1; y = y + 1>` (por ahora). Podemos usarla para condición si no le ponemos instrucciones. La primera es condicional, la segunda es incondicional, la segunda es la que permite implementar exclusión mutua.
