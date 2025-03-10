@@ -1,20 +1,20 @@
-Primero descompongo los procesos en acciones atomicas de grano fino.
+Primero descompongo los procesos en acciones atómicas de grano fino.
 
 P1:
 
 1. load posX, acumulador
-2. cmp acumulador, 0 //Tendria que poner algun salto condicional jmp?
-3. mul 4, 2, acumulador // Esta instruccion me genera ciertas dudas. 
-4. store acumulador,posY
+2. cmp acumulador, 0 // ¿Tendría que poner algún salto condicional jmp?
+3. mul 4, 2, acumulador // Esta instrucción me genera ciertas dudas.
+4. store acumulador, posY
 5. add 2, acumulador
 6. store acumulador, posX
 
-P2: 
+P2:
 
 7. load posX, acumulador
 8. cmp acumulador, 0
 9. add 1, acumulador
-10. store acumulador,posX
+10. store acumulador, posX
 
 P3:
 
@@ -22,16 +22,15 @@ P3:
 12. mul 3, r1
 13. load posX, r2
 14. mul 2, r2
-15. add r1, r2, acumulador //valida ? 
+15. add r1, r2, acumulador // ¿Válida?
 16. add 1, acumulador
 17. store acumulador, posX
 
-Historias del programa: 
+Historias del programa:
 
 - 1-2-4-5-6-7-8-9-10-11-12-13-14-15-16-17: 56.
-- 11-12-13-14-15-16-17-1-2-3-4-5-6-7-8-9-10: 2. //Esta historia no se si esta del todo correcta. 
+- 11-12-13-14-15-16-17-1-2-3-4-5-6-7-8-9-10: 2. // Esta historia no sé si está del todo correcta.
 - 11-12-1-2-3-4-5-6-13-14-15-16-17-7-8-9-10: 22.
-- 11-12-1-2-3-4-5-6-7-8-9-10-13-14-15-16-17: 23. 
+- 11-12-1-2-3-4-5-6-7-8-9-10-13-14-15-16-17: 23.
 
-Como podemos ver los tres resultados son posibles en un programa concurrente. Los ultimos dos son "erroneos" porque no se podria hacer con los valores de
-las variables en ningun estado. 
+Como podemos ver, los tres resultados son posibles en un programa concurrente. Los últimos dos son "erróneos" porque no se podrían obtener con los valores de las variables en ningún estado.
