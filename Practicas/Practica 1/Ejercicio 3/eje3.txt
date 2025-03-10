@@ -1,0 +1,14 @@
+// Para este ejercicio supongo que las funciones push(), pop(), isNotEmpty() existen.
+// En principio deberíamos usar sincronización para que mientras preguntamos si la cola no esta vacía otro proceso la vacié. Y luego cuando yo estoy usando una instancia
+de cierto recurso no quiero que nadie mas la use ?(1), lo cual incluye pushearlo a la cola.
+
+Queue queue; 
+
+process getResource [] {
+    <await (isNotEmpty(queue)) resource = pop(queue)>;
+    //Código de trabajo con el recurso ?(1)
+    <push(queue, resource)>
+}
+
+
+- ?(1) Todo el uso del recurso debería de hacerlo con exclusion mutua o solo la al momento de agregarlo a la cola.
