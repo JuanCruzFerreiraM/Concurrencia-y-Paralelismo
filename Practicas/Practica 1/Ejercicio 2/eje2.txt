@@ -1,0 +1,12 @@
+// Tenemos un numero N y queremos ver cuantas veces aparece dicho numero en un arreglo de M elementos.
+// La lógica seria que no queremos que nos modifiquen la variable total hasta que no la terminamos de usar en el proceso, usamos exclusion mutua.
+// La idea es usar M procesos en los que cada uno revise una posición dentro del array para saber si es igual a N
+// Use int pero podría ser double o float tranquilamente 
+
+int total = 0; 
+int array[M] = [...];
+int N = ...; 
+
+process counterArray [i = 0 to M-1] {
+    if (array[i] == N) then <total = total + 1>; //Uso de grano grueso con exclusion mutua.
+}
