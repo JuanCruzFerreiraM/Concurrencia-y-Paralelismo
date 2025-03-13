@@ -1,2 +1,61 @@
-a) 
+a)  
 
+int N = ... ;
+boolean freeToWork = true;
+
+process Persona [id = 0 to N-1] { 
+    File datos = ...; 
+    <await freeToWork; freeToWork = false>
+    Imprimir(datos);
+    freeToWork = true;
+}
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+b) 
+
+int N = ... ; 
+Queue cola; 
+int next = -1;
+
+process Persona [id = 0 to N-1] {
+    File datos = ...;
+    <if (next = -1) then next = id;
+    else  cola.push(id);>;
+    <await (next  = id)>;
+    Imprimir(datos);
+    <if (isEmpty(cola)) then next = -1;
+    else next = cola.pop()>;
+}
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+c) //Duda, asumo que la cola maneja el orden por edad y id o debo implementar yo ese manejo
+
+int N = ... ; 
+Queue cola; 
+int next = -1;
+int edadActual;
+
+process Persona [id = 0 to N-1] {
+    File datos = ...;
+    int edad = ...;
+
+    <if (next = -1) then next = id;
+    else  cola.push(id,edad);>;
+    <await (next.id  = id)>;
+    Imprimir(datos);
+    <if (isEmpty(cola)) then next = -1;
+    else next = cola.pop()>;
+}
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+d) 
+
+int N = ... ;
+boolean freeToWork = true;
+
+process Persona [id = 0 to N-1] { 
+    File datos = ...; 
+    <await freeToWork; freeToWork = false>
+    Imprimir(datos);
+    freeToWork = true;
+}
