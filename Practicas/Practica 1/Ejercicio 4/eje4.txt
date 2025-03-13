@@ -19,7 +19,7 @@ int next = -1;
 
 process Persona [id = 0 to N-1] {
     File datos = ...;
-    <if (next = -1) then next = id;
+    <if (next == -1) then next = id;
     else  cola.push(id);>;
     <await (next  = id)>;
     Imprimir(datos);
@@ -39,11 +39,11 @@ process Persona [id = 0 to N-1] {
     File datos = ...;
     int edad = ...;
 
-    <if (next = -1) then next = id;
+    <if (next == -1) then next = id;
     else  cola.push(id,edad);>;
     <await (next.id  = id)>;
     Imprimir(datos);
-    <if (isEmpty(cola)) then next = -1;
+    <if (cola.isEmpty()) then next = -1;
     else next = cola.pop()>;
 }
 -----------------------------------------------------------------------------
@@ -51,11 +51,39 @@ process Persona [id = 0 to N-1] {
 d) 
 
 int N = ... ;
-boolean freeToWork = true;
+int next = 0;
 
 process Persona [id = 0 to N-1] { 
     File datos = ...; 
-    <await freeToWork; freeToWork = false>
+    <await (next == id)>
     Imprimir(datos);
-    freeToWork = true;
+    next = next + 1;
+}
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+e) 
+
+int N = ... ; 
+Queue cola; 
+boolean emptyPrinter = false;
+int next = -1;
+
+
+process Persona [id = 0 to N-1] {
+    int edad = ...;
+    File datos = ...;
+    <cola.push(id, edad)>
+    <await (next == id)>
+    Imprimir(datos);
+    emptyPrinter = true;
+}
+
+process Coordinador {
+    <await not cola.isEmpty()>
+    next = cola.pop(); // esto es xq solo el proceso coordinador modifica la variable next ? 
+    <await emptyPrinter>
+    emptyPrinter = false; 
+
+
 }
