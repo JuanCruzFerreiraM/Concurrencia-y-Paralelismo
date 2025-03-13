@@ -1,0 +1,32 @@
+// P alumnos 3 profesores 
+// Alumnos entregan, profesores corrigen y dan nota, en orden en que se entregan los examenes
+//Asumo que las funciones para manejo de colas, y la funcion corregir se encuentrar implementadas
+
+
+Queue cola; 
+int P = ...;
+int presentes = 0;
+hashtable notas;
+
+process Profesor[id = 0 to 3] {
+  Examen examenActual;   
+ <await (presentes = P)>
+
+ while (presentes > 0) {
+    <await not cola.isEmpty() or presentes == 0; 
+    if (presentes == 0) then break;
+    else examenActual = cola.pop();
+    presentes = presentes - 1;>
+    int nota = Corregir(examenActual);
+    <notas.add(nota,examenActual.id)>
+    }
+}
+
+process Alumno [id = 0 to P-1] {
+    <presentes = presentes + 1>
+    <await presentes == P>
+    Examen test  = hacerExamen();
+    <cola.push(test)>
+    <await isCorregido(id)> //Funcion que mira si el valor de nota en la tabla no es basura
+    int nota = notas.get(id);
+}
