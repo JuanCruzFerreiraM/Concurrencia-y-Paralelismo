@@ -1,5 +1,3 @@
-// P alumnos 3 profesores 
-// Alumnos entregan, profesores corrigen y dan nota, en orden en que se entregan los examenes
 //Asumo que las funciones para manejo de colas, y la funcion corregir se encuentrar implementadas
 
 
