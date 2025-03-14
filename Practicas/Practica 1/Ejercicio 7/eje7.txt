@@ -32,4 +32,5 @@ process Admin {
 /*
 Duda: En principio el proceso es justo porque itera por un for en el que todos van a tener oportunidad, pero que pasa si las tareas no criticas de algún
 proceso son muy largas, todos los siguientes deben esperar a que ese termine toda su ejecución => alguna otra forma de solucionarlo ?.
+No cumple con ausencia de demora innecesaria. 
 */
