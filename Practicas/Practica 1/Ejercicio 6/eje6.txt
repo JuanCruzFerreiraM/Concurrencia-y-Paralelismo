@@ -1,0 +1,8 @@
+
+- Exclusión mutua: A lo sumo un proceso esta en su SC. Esto se cumple ya que ambos esperan a que el otro salga del turno. La variable turno 
+no puede ser 1 y 2 al mismo tiempo.
+- LiveLock: Dado que la variable turno esta inicializada en 1 el acceso inicial esta asegurado y como luego las variables cambian cuando el proceso
+sale de su SC entonces siempre va a acceder uno solo.
+-Ausencia de Demora Innecesaria: Al cambiar el valor antes de acceder a su SNC, el otro proceso ya puede ingresar a su SC sin esperar a que el siguiente termine.
+- Eventual Entrada: El proceso 1 tiene su primer acceso asegurado, dado que las SC son finitas eventualmente el valor de la variable turno sera cambiado y el 
+otro proceso podrá acceder a su SC.
