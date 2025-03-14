@@ -1,0 +1,35 @@
+//Proceso id quiero ingresar a su sección critica avisa al coordinador y espera. 
+// Coordinador espera a que le pidan el permiso y da acceso cuando le toque.
+//Coordinador espera a que le informen que salio de la SC
+//Coordinador habilita a otro proceso a que acceda
+
+
+int solicitud [N] = ([n] 0)
+int permiso [N] = ([n] 0)
+int N = ...
+process Worker [id: 0 to N] {
+    while (true) {
+        //Tareas no criticas
+        solicitud[id] = 1;
+        while( permiso[id] == 0) skip;
+        //Tareas criticas
+        permiso[id] = 0; //Duda: Esto seria la forma de avisar, esta bien que use el mismo array o debería de usar otro
+        //Tareas no criticas
+    }
+}
+
+process Admin {
+    while(true) {
+        for (int i = 0; i < N; i++) {
+            while(solicitud[i] == 0) skip;
+            solicitud[i] = 0;
+            permiso[i] = 1;
+            while(permiso[i] == 1) skip;
+        } 
+    }
+}
+
+/*
+Duda: En principio el proceso es justo porque itera por un for en el que todos van a tener oportunidad, pero que pasa si las tareas no criticas de algún
+proceso son muy largas, todos los siguientes deben esperar a que ese termine toda su ejecución => alguna otra forma de solucionarlo ?.
+*/
