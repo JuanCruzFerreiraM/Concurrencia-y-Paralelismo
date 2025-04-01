@@ -1,0 +1,124 @@
+// a- Una fotocopiadora compartida por N personas, usadas de a una a la vez.
+
+int N = ...;
+sem mutex = 1;
+
+process Persona ()[id = 0 to N-1] {
+    P(mutex);
+    Fotocopiar();
+    V(mutex)
+}
+
+//b- igual que a pero respetando orden de llegada
+
+
+//c- igual que b pero con prioridad por edad
+
+int N = ...;
+Queue cola;
+sem mutex = 1; sleep[N] = ([N] 0)
+boolean libre = true; 
+
+process Persona ()[id = 0 to N-1] {
+    int next;
+    int edad = ...;
+    P(mutex);
+    if(libre) {
+        libre = false
+        V(mutex)
+    }
+    else { 
+        cola.push(id, edad);
+        V(mutex);
+        P(sleep[id]);
+    }
+    Fotocopiar();
+    P(mutex)
+    if(is_empty(cola)) {libre = true;}
+    else {
+        next = cola.pop;
+        V(sleep[next]);
+    }
+    V(mutex);
+}
+
+//d- Deben usarse por orden de identificador.
+
+int N = ...;
+sem usePrinter[N] = ([1] 1 [N - 1] 0) //Primero en 1 el resto en cero
+
+
+process Persona ()[id = 0 to N-1] {
+    P(usePrinter[id]);
+    Fotocopiar();
+    V(usePrinter(id + 1)) //Duda en cuanta a si debemos asegurar que no salga fuera de rango.
+   
+}
+
+//e- igual que b pero tenemos ahora un empleado administrador.
+
+int N = ...;
+Queue cola;
+sem mutex = 1, pedido_imprimir = 0, permiso_imprimir[N] = ([N] 0), listo = 0;
+
+process Persona ()[id = 0 to N-1] {
+   P(mutex);
+   cola.push(id);
+   V(mutex);
+   V(pedido_imprimir);
+   P(permiso_imprimir[id]);
+   Fotocopiar();
+   V(listo);
+}
+
+process empleado () {
+   int solicitudes = 0;
+   while (solicitudes  < N) {
+        int id_solicitud;
+        P(pedido_imprimir);
+        P(mutex);
+        id_solicitud = cola.pop();
+        V(mutex);
+        V(permiso_imprimir[id_solicitud]);
+        P(listo);
+        solicitudes++;
+   }
+}
+
+//f- igual que en e pero ahora tenemos 10 fotocopiadoras
+int N = ...;
+Queue cola, fotocopiadoras;
+sem mutex1 = 1, mutex2 = 1, pedido_imprimir = 0, permiso_imprimir[N] = ([N] 0), printers_libres = 10;
+int fotocopiadora_asignada [N] = ([N] -1);
+
+process Persona ()[id = 0 to N-1] {
+   int m;
+   P(mutex1);
+   cola.push(id);
+   V(mutex)1;
+   V(pedido_imprimir);
+   P(permiso_imprimir[id]);
+   m = fotocopiadora_asignada[id];
+   Fotocopiar();
+   P(mutex2);
+   fotocopiadoras.pop(m);
+   V(mutex2);
+   V(printers_libres);
+}
+
+process empleado () {
+   int solicitudes = 0;
+   while (solicitudes  < N) {
+        int id_solicitud;
+        P(pedido_imprimir);
+        P(mutex1);
+        id_solicitud = cola.pop();
+        V(mutex1);
+        P(printers_libres);
+        P(mutex2);
+        fotocopiadora_asignada[id_solicitud] = fotocopiadoras.pop();
+        V(mutex2)
+        V(permiso_imprimir[id_solicitud]);
+        solicitudes++;
+   }
+}
