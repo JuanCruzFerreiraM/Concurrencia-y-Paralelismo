@@ -1,0 +1,29 @@
+// T camiones de trigo y M camiones de maíz. 7 slots para camiones, solo 5 del mismo tipo
+
+
+sem slot = 7;
+sem cantT = 5;
+sem cantM = 5; 
+int T = ...;
+int M = ...
+
+
+process camionT ()[id = 1..T] {
+    while (true) {
+        P(slots);
+        P(canT);
+        _descargar();
+        V(cantT);
+        P(slots);
+    }
+}
+
+process camionM ()[id = 1..M] {
+    while (true) {
+        P(slots);
+        P(canM);
+        _descargar();
+        V(cantM);
+        P(slots);
+    }
+}
