@@ -1,0 +1,21 @@
+// SO mantiene 5 instancias de un recurso almacenadas en una cola 
+
+sem mutex = 1; 
+sem recursos = 5;
+int N = ...;
+Queue cola = ...;
+
+process Consumidor()[i = 1 to N] {
+    Recurso rec;
+    while (true) {
+        P(recursos);
+        P(mutex);
+        rec = cola.pop(rec);
+        V(mutex);
+        Uso del recurso
+        P(mutex);
+        cola.push(rec);
+        V(mutex);
+        V(recursos);
+    }
+}
