@@ -1,0 +1,55 @@
+// 40 alumnos - 1 maestra. Cada alumno recibe una tarea, hace la tarea, entrega la tarea, maestra corrige - si hay errores re entrega y se repite el proceso - si no hay
+// errores libera al alumno.
+
+File tareas [40];
+Queue entregados;
+int N = 40; 
+sem espera[40] = [40 0]; mutex = 1; corregir = 0;
+boolean aprobados[40] = [40 false];
+
+
+process alumno ()[id = 0 to N - 1] {
+    P(espera[id]);
+    File tarea = tareas[id];
+    _realizar_tarea(tarea);
+
+    P(mutex);
+    entregados.push(tarea, id);
+    V(mutex);
+    V(corregir);
+    P(espera[id])
+    while(! aprobados[id]) {
+        tarea = tareas[id];
+        _corregir_tarea(tarea);
+        P(mutex);
+        entregados.push(tarea, id);
+        V(mutex);
+        V(corregir);
+        P(espera[id]);
+    }
+
+}
+
+process maestra () {
+    for i = 0 to N - 1 {
+        tareas[i] = ...;
+        V(iniciar[i])
+    }
+
+    int aprobados = 0;
+
+    while (aprobados < 40) {
+        P(corregir);
+        P(mutex);
+        tarea, id_alu = entregados.pop();
+        V(mutex);
+        boolean aprueba = _corregir_tarea(tarea);
+        if (aprueba) {
+            aprobados[id_alu] = true;
+            terminados++;
+        } else {
+            tareas[id_alu] = tarea;
+        }
+        V(espera[id_alu]);
+    }
+}
