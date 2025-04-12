@@ -1,0 +1,7 @@
+Queue cola, botellas;
+sem mutex_cola = 1, botellas = 20, vació = 0;
+int C = ...;
+
+process corredor ()[id = 0 to C -1] {
+    
+}
