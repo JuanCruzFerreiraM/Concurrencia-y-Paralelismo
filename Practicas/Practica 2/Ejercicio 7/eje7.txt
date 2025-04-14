@@ -1,0 +1,22 @@
+/* 15 empleados, dividimos en 3 grupos por orden de llegada, cada empleado hace un producto y debemos tener p productos, el empleado trabaja ni bien tiene grupo. */ 
+- div es division entera con redondeo hacia abajo. Se presupone la función _trabajar() implementada. Para hacer el producto los empleados de cada grupo  - 
+
+int P = ..., total_empleados = 0;
+sem mutex_g = 1, grup[5] = ([5] 1);
+int productos[5] = ([5] 0);
+
+process empleado () [id = 0 to 14] {
+    int grupo;
+    P(mutex_g);
+    grupo = total_empleados div 3;
+    total_empleados++;
+    V(mutex_g)
+    P(grup[grupo]);
+    while (productos[grupo] < P) {
+        productos[grupo]++;
+        V(grup[grupo]);
+        _trabajar();
+        P(grup[grupo]);
+    }
+    V(grup[grupo]);
+}
