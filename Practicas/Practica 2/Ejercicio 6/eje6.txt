@@ -1,0 +1,58 @@
+Tenemos 4 combis con 25 lugares. Un vendedor y C clientes. Los pasajes se venden en orden de llegada. Si la combi tiene lugar entonces entra sino se retira
+Las combis esperan a que suban los 25 pasajeros, luego realiza el viaje y espera a que vajen los 25 pasajeros.
+La funcion _viajar() se presupone implementada. (... significan un valor definido pero que no conozco). 
+
+! En la implementacion deveriamos optimizar los semaforos sentados, llegada y abajo, para esto considerar semaforos de 4 que funcionen como contadores. 
+! de esta forma deberia de ser mejor. 
+
+int C = ...;
+Queue fila;
+sem mutex_q = 1, cliente = 0, vendedor = 0, sentados[25] = ([25] 0), llegada[25] = ([25] 0), abajo[C] = ([C] 0);
+
+process cliente ()[id = 0 to C - 1] {
+    int combi  = ... //valor ya conocido por el cliente.
+    P(mutex_q);
+    fila.push(id, combi);
+    V(mutex_q);
+    V(cliente);
+    P(vendedor);
+    Pasaje pass = pasajes[id];
+    if (pass.id == -1) {
+        return;
+    } else {
+        V(sentados[id]);
+        P(llegada[id]);
+        V(clientes_abajo[id]); //muy mal nombre de variable.
+    }
+}
+
+process vendedor() {
+    P(cliente);
+    P(mutex_q);
+    cliente = fila.pop();
+    V(mutex_q);
+    int aux_combi = cliente.combi;
+    int id = cliente.id;
+    if (combis[aux_combi] < 25) {
+        combis[aux_combi]++;
+        pasajes[id] = ...;
+    } else {
+        pasajes[id].id  = -1;
+    }
+}
+
+process combi ()[id = 0 to 3] {
+    for (i = 0; i < 25; i++) {
+        P(sentados[i]);
+    }
+    _viajar();
+    for (i = 0; i < C; i++) {
+        V(llegada[i]);
+    }
+    for (i = 0; i < C; i++) {
+        P(abajo[i]);
+    }
+    _viajar();
+    
+
+}
