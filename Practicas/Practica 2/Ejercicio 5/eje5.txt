@@ -1,14 +1,65 @@
-Queue cola, botellas;
-sem mutex_cola = 1, botellas = 20, vació = 0; maquina = 0;
-int C = ...;
-//No lo termine de entender.
+/* Se tienen C corredores. Maquina con capacidad para 20 botellas. Repositor recarga botellas. La carrera inicia con C corredores. Los corredores acceden a la maquina por 
+orden de llegada. Maquina sin botellas, le aviso al repositor. */
 
-process corredor ()[id = 0 to C -1] {
+- Se asume las función _correr(), _recargar(int N) y   _tomar-botella() implementadas-
+
+Queue fila = ...;
+int contador = 0, botellas = 0; act = -1;
+sem esperar[C] = ([C] 0), salida = 0, maquina = 0, maq_vacía = 0, mutex = 1;
+boolean libre = true;
+
+process corredor()[id = 0 to C-1] {
+    P(mutex);
+    contador++;
+    if(contador == C) {
+        for (int i = 0; i < C; i++) {
+            V(salida);
+        } 
+    } 
+    V(mutex);
+    P(salida);
+    _correr();
+    P(maquina);
+    if (libre == true) {
+        libre == false;
+        _tomar_botella();
+        V(maquina);
+    } else {
+        fila.push(id);
+        v(maquina);
+        P(esperar[id]);
+    }
+
+    if (botella == 0) {
+        act = id;
+        V(maq_vacía);
+        P(esperar[id]);
+    }
+
+    botellas--;
+    contador--;
     
+    if (contador == 0) { 
+        V(maq_vacía);
+    }
+
+    P(maquina); 
+    if (is_empty(fila)) {
+        libre = true;
+    } else {
+        int sig = fila.pop();
+        V(esperar[sig]);
+    }
+    V(maquina);
 }
 
-process repositori () {
-    P(vacio);
-    _reponer();
-    V(maquina);
+
+process repositor() {
+    P(maq_vacía);
+    while(contador > 0) {
+        _recargar(20);
+        botellas(20);
+        V(esperar[act]);
+        P(maq_vacía);
+    }
 }
