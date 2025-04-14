@@ -1,7 +1,14 @@
 Queue cola, botellas;
-sem mutex_cola = 1, botellas = 20, vació = 0;
+sem mutex_cola = 1, botellas = 20, vació = 0; maquina = 0;
 int C = ...;
+//No lo termine de entender.
 
 process corredor ()[id = 0 to C -1] {
     
+}
+
+process repositori () {
+    P(vacio);
+    _reponer();
+    V(maquina);
 }
