@@ -1,0 +1,46 @@
+Bases de datos de solo lectura que puede atender 5 consultas simultaneas. 
+
+int N = ...;
+
+-- Suponemos que la función read() de la BD se encuentra implementada --
+
+monitor admin {
+    cond espera[N]
+    Queue cola; 
+    File response[N];
+    cond has_request;
+
+    process r_request (id_reader: int; request: File; response_out: File) {
+        push(cola, id_reader, request);
+        signal(has_request);
+        wait(espera[id_reader]);
+        response_out = response[id_reader];
+    }
+
+    process next(id_reader: int; request: File) {
+        while(empty(cola)) wait(has_request);
+        pop(cola, id_reader, request); 
+    }
+
+    process r_resolve(id_reader, response_in: File) {
+        response[id_reader] = response_in;
+        signal(esperar[id_reader]);
+    }
+}
+
+process bd_handler()[id = 0 to 4] {
+    int aux;
+    File request, response;
+    while(true) {
+        admin.next(aux, request);
+        response = read(request);
+        admin.r_resolve(aux, response);
+    }
+}
+
+process reader()[id= 0 to N-1] {
+    File request = ..., response;
+    while(true) {
+        admin.r_request(id,request,response);
+    }
+}
