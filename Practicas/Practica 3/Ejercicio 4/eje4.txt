@@ -1,0 +1,88 @@
+3 profesores toman oral a 30 alumnos de acuerdo al orden de llegada. Se espera a que un profesor llame. El profesor da la nota.
+
+process profesor () [id = 0 to 2] {
+    boolean fin; 
+    float nota;
+    AudioFile examen;
+    finalizar.quedan_alumnos(fin);
+    while(fin) {
+        admin.llamar(id);
+        escritorio[id].esperar_resolución(examen);
+        nota = corregir(examen);
+        escritorio[id].dar_nota(nota);
+        finalizar.quedan_alumnos(fin);
+    }
+}
+
+process alumno () [id = o to 29] {
+    int id_profesor;
+    float nota;
+    AudioFile examen;
+    admin.esperar_llamado(id_profesor);
+    examen = dar_oral();
+    escritorio[id_profesor].entregar_examen(nota, examen);
+}
+
+monitor admin {
+   Queue profesores;
+   cond espera_alumno;
+   int esperando = 0, prof_libres = 0;
+
+   process llamar (id_profesor: in int) {
+        push(profesores, id_profesor);
+        if (espera_alumno > 0) {
+            espera_alumno--;
+            signal(espera_alumno);
+        } else {
+            prof_libres++;
+        }
+   }
+
+   process esperar_llamado (id_profesor: out int){
+        if (prof_libres == 0) {
+            esperando++;
+            wait(espera_alumno);
+        } else {
+            prof_libres--;
+        }
+        id_profesor = pop(profesores);
+   }
+}
+
+monitor escritorio [id = 0 to 2] { //Interface para tomar el examen
+    cond espera_alumno, espera_profesor;
+    float nota;
+    AudioFile examen;
+    boolean terminado = false;
+    
+    process entregar_examen(nota_final: out float; e: in AudioFile) {
+        examen = e;
+        terminado = true;
+        signal(espera_profesor);
+        wait(espera_alumno)
+        nota_final = nota;
+        signal(espera_profesor);
+
+    }
+
+    process dar_nota (nota_final: in float) {
+        nota = nota_final;
+        signal(espera_alumno);
+        wait(espera_profesor);
+        terminado = false;
+    }
+
+    process esperar_resolución (e: out AudioFile){
+        if (not terminado) {
+            wait(espera_profesor);
+        }
+        e = examen;
+    }
+}
+
+monitor finalizar {
+    int alumnos;
+    process quedan_alumnos(fin: out boolean) {
+        fin = (alumnos++ < N)
+    }
+}
