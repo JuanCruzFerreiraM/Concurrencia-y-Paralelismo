@@ -1,0 +1,225 @@
+N personas que deben fotocopiar un documento.
+
+
+a) 1 fotocopiadora, una persona a la vez. 
+
+-- La función Fotocopiar() se encuentra implementada --
+
+int N = ...;
+
+monitor admin{
+    process usar_fotocopiadora(File f) {
+        Fotocopiar(f);
+    }
+}
+
+process persona() [id = 0 to N-1] {
+    File  f = ...;
+    admin.usar_fotocopiadora(f);
+}
+
+b) Idem (a) pero respetando el orden de llegada.
+
+-- La función Fotocopiar() se encuentra implementada --
+
+int N = ...;
+
+monitor admin{
+    boolean libre = true;
+    cond cola;
+    int personas_esperando = 0
+
+    process usar() {
+        if (!libre) {
+            wait(cola)
+            personas_esperando++;
+        } else {
+            libre = false;
+        }
+    }
+
+    process liberar() {
+        if (personas_esperando > 0) {
+            personas_esperando--;
+            signal(cola);
+        } else {
+            libre = true;
+        }
+    }
+}
+
+process persona() [id = 0 to N-1] {
+    File  f = ...;
+    admin.usar();
+    Fotocopiar(f);
+    admin.liberar();
+}
+
+c)  Idem (b) pero con prioridad por edad.
+
+-- La función Fotocopiar() se encuentra implementada --
+
+int N = ...;
+
+monitor admin{
+    boolean libre = true;
+    cond espera[N];
+    int personas_esperando = 0, idAux;
+    OrderQueue fila;    
+
+    process usar(id,edad: int) {
+        if (!libre) {
+            push(fila,id,edad)
+            wait(espera[id])
+            personas_esperando++;
+        } else {
+            libre = false;
+        }
+    }
+
+    process liberar() {
+        if (personas_esperando > 0) {
+            pop(fila,idAux);
+            personas_esperando--;
+            signal(espera[idAux]);
+        } else {
+            libre = true;
+        }
+    }
+}
+
+process persona() [id = 0 to N-1] {
+    File  f = ...;
+    int edad = ...;
+    admin.usar(id,edad);
+    Fotocopiar(f);
+    admin.liberar();
+}
+
+d) Idem (a) pero respetando el orden dado por el ID (X no puede usar la fotocopiadora si X-1 no la uso aun).
+
+-- La función Fotocopiar() se encuentra implementada --
+
+int N = ...;
+
+monitor admin{
+
+    cond esperar[N];
+    int id_act = 0;
+
+    process usar() {
+        if (id != id_act) {
+            wait(esperar[id_act]);
+        }
+    }
+
+    process salir() {
+        id_act++;
+        signal(id_act);
+    }
+}
+
+process persona() [id = 0 to N-1] {
+    File  f = ...;
+    admin.usar(id);
+    Fotocopiar(f);
+    admin.salir()
+}
+
+e) Idem (b) pero con un empleado que indica cuando se debe de usar la fotocopiadora.
+
+-- La función Fotocopiar() se encuentra implementada --
+
+int N = ...;
+
+monitor admin{
+    cond fila, empleado, listo;
+    int esperando = 0;
+
+    process esperar() {
+        esperando++;
+        signal(empleado);
+        wait(fila);
+    }
+
+    process dar_acceso() {
+        if(esperando == 0) {
+            wait(empleado);
+        }
+        esperando--;
+        signal(fila);
+        wait(listo);
+    }
+
+    process salir() {
+        signal(listo);
+    }
+}
+
+process empleado() {
+    int atendidos = 0;
+    while(atendidos > N) {
+        admin.dar_acceso();
+        atendidos++;
+    }
+}
+
+process persona() [id = 0 to N-1] {
+    File f: ...;
+    admin.esperar();
+    Fotocopiar(f);
+    admin.salir();
+}
+
+f) Idem (e) pero con 10 impresoras.
+
+
+-- La función Fotocopiar() se encuentra implementada --
+
+int N = ...;
+
+monitor admin{
+    cond esperar[N], empleado, libres;
+    Queue fila, fotocopiadoras = {1,2,3,4,5,6,7,8,9,10};
+    int asignados[N] = ([N] -1);
+
+    process esperar(id: in int; fotocopiadora: out int) {
+        push(fila,id)
+        signal(empleado);
+        wait(espera[id]);
+        nro = asignaciones[]
+    }
+
+    process dar_acceso() {
+        if(esperando == 0) {
+            wait(empleado);
+        }
+        int id = push(fila);
+        if(empty(fotocopiadoras)) {
+            wait(libres);
+        }
+        asignados[id] = pop(fotocopiadoras);
+        signal(esperar[id]);
+    }
+
+    process salir(fotocopiadora: in int) {
+       push(fotocopiadoras,fotocopiadora);
+       signal(libres);
+    }
+}
+
+process empleado() {
+    int atendidos = 0;
+    while(atendidos > N) {
+        admin.dar_acceso();
+        atendidos++;
+    }
+}
+
+process persona() [id = 0 to N-1] {
+    File f: ...;
+    int nro;
+    admin.esperar(id, nro);
+    Fotocopiar(f);
+    admin.salir(nro);
+}
