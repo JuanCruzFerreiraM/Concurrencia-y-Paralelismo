@@ -1,0 +1,68 @@
+Maratón con C corredores. Maquina expendedora de botellas. Reponedor que recarga botellas.
+
+
+int C = ...;
+
+process corredor () [id = 0 to C-1] {
+    admin.largada();
+    correr();
+    admin.tomar_botella();
+}
+
+process reponedor () {
+    boolean corredores;
+    admin.final(corredores);
+    while (corredores) { 
+        admin.reponer(); 
+        admin.final(corredores);
+    }
+}
+
+monitor admin { 
+    int corredores = 0, botellas = 20,  corredores_esperando= 0, corredores_fin = 0;
+    cond vccorredores, vcreponedor, vcfila, vcbotellas;
+    boolean libre = true;
+
+
+    process largada () {
+        corredores++;
+        if (corredores == 20) {
+            signal_all(vccorredores);
+        } else {
+            wait(vccorredores);
+        }
+    }
+
+    process tomar_botella () {
+        if (not libre) {
+            corredores_esperando++;
+            wait(vcfila)
+        } else {
+            libre = false;
+        }
+        if (botellas == 0) {
+            signal(vcreponedor);
+            wait(vcbotellas);
+        }
+        botellas--;
+        if (corredores_esperando > 0) {
+            corredores_esperando--;
+            signal(vcfila);
+        } else {
+            libre = true;
+        }
+        corredores_fin++;
+    }
+
+    process reponer () {
+        if (botellas > 0) {
+            wait(vcreponedor);
+        }
+        botellas = 20;
+        signal(vcbotellas);
+    }
+
+    process final(hay_corredores: out boolean) {
+        hay_corredores = (corredores_fin <= C);
+    }
+}
