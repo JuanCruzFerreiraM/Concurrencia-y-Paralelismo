@@ -1,7 +1,7 @@
-50 alumnos, al llegar forman una fila. Una vez que llegaron los 50, se le avisa al jefe de trabajos practicos. Quien les entrega una numero de grupo 
+50 alumnos, al llegar forman una fila. Una vez que llegaron los 50, se le avisa al jefe de trabajos prácticos. Quien les entrega una numero de grupo 
 del 1 al 25. Al recibir numero el alumno comienza a realizar la practica. Al llegar los dos alumnos de un grupo, les entrega la nota del grupo. 
 
--- Existe la funcion dar_numero() que da el numero aleatorio a los alumnos. Tambien asumo la funcion hacer_practica() implementada --
+-- Existe la función dar_numero() que da el numero aleatorio a los alumnos. También asumo la función hacer_practica() implementada --
 
 
 process alumno () [id = 0 to 50]{
