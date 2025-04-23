@@ -1,0 +1,117 @@
+1) Usando semáforos
+
+a) Descripción: P personas deben realizar una carga con sube. Usadas de acuerdo al orden de llegada. La maquina debe usarse con exclusion mutua.
+
+-- La función usar_terminal() se encuentra implementada --
+
+
+Queue fila_espera;
+boolean libre = true;
+sem mutex = 1, esperar[P] = ([P] 0);
+
+process personas () [id = 0 to P - 1] {
+    P(mutex);
+    if (libre == false) {
+        push(cola, id);
+        V(mutex);
+        P(esperar[id]);
+    } else {
+        libre = false;
+        V(mutex);
+    }
+    usar_terminal();
+    P(mutex);
+    if (not empty(cola)) {
+        V(esperando[pop(cola)]);
+    } else  {
+        libre = true;
+    }
+    V(mutex);
+}
+
+b) Idem (a) pero con T terminales disponibles.
+
+Queue fila_espera, terminales = [1,2,...,T-1,T];
+sem mutex = 1, mutex_cola = 1, esperar[P] = ([P] 0);
+int terminales = T;
+
+process personas () [id = 0 to P - 1] {
+    int nro_terminal;
+    P(mutex);
+    if (terminales == 0) {
+        push(cola, id);
+        V(mutex);
+        P(esperar[id]);
+    } else {
+        terminales--;
+        V(mutex);
+    }
+    P(mutex_cola);
+    nro_terminal = pop(terminales);
+    V(mutex_cola);
+    usar_terminal(nro_terminal);
+    P(mutex_cola);
+    push(terminales,nro_terminal);
+    V(mutex_cola);
+    P(mutex); 
+    if (not empty(cola)) {
+        V(esperando[pop(cola)]);
+    } else {
+        terminales++;
+    }
+    V(mutex);
+}
+
+2) Monitores
+
+Descripción: Elección estudiantil N personas votan, una autoridad de mesa, por orden de llegada, excepto que sean ancianos o embarazadas, los cuales
+tienen prioridad.
+
+process persona () [id = 0 to N-1] {
+    int is_embarazada = ...;
+    int edad = ...;
+    mesa.llegada(edad,is_embarazada,id);
+    votar();
+    mesa.fin();
+}
+
+process autoridad_mesa () {
+    boolean total_votantes;
+    admin.votantes(total_votantes);
+    while(total_votantes) { 
+        mesa.dar_acceso();
+        admin.votantes(total_votantes);
+    }
+}   
+
+monitor mesa {
+    Queue fila_ordenada; //Suponemos que es una fila ordenada por edad y si es o no embarazada.
+    cond vcpersonas[N], vcautoridad, fin;
+    int esperando = 0, han_votado = 0;
+
+    process llegada (edad: in int; is_embarazada: in boolean; id: in int) {
+        esperando++;
+        push(fila_ordenada, id, edad, is_embarazada); //inserta por prioridad.
+        signal(vcautoridad);
+        wait(vcpersonas[id]);
+    }
+
+    process dar_acceso()  {
+        if (esperando == 0) {
+            wait(vcautoridad);
+        }
+        signal(vcpersonas[pop(fila_ordenada)]);
+        esperando--;
+        wait(fin);
+    }
+
+    process votantes (total_votantes: out boolean) {
+        total_votantes = (han_votado <= N);
+    }
+
+    process salir() {
+        han_votado++;
+        signal(fin);
+    }
+
+}
