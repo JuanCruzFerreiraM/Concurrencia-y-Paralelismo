@@ -1,0 +1,28 @@
+5 equipos de 4 personas. Esperan a que esten todos los integrantes de un equipo. Al llegar todos empienzan a jugar. Juntan monedas de 1, 2 o 5 pesos.
+Cada uno junta 15 monedas. Al finalizar todos conocen el valor final que juntaron. 
+
+-- Existe la funcion moneda() que permite juntar una moneda y retorna el valor de la misma --
+
+
+process jugador () [id = 0 to 19] {
+    int grupo = ...;
+}
+
+monitor admin {
+    cond vcequipo[5];
+    int integrantes_presentes[5];
+
+    process llegada (equipo: in int) {
+        integrantes_presentes[equipo]++;
+        if (integrantes_presentes[equipo] == 4) {
+            signal(vcequipo[equipo]);
+        } else {
+            wait(vcequipo[equipo]);
+        }
+    }
+    
+    process jugar (total_puntos: out ) {
+        
+    }
+}
+
