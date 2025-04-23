@@ -1,0 +1,64 @@
+50 alumnos, al llegar forman una fila. Una vez que llegaron los 50, se le avisa al jefe de trabajos practicos. Quien les entrega una numero de grupo 
+del 1 al 25. Al recibir numero el alumno comienza a realizar la practica. Al llegar los dos alumnos de un grupo, les entrega la nota del grupo. 
+
+-- Existe la funcion dar_numero() que da el numero aleatorio a los alumnos. Tambien asumo la funcion hacer_practica() implementada --
+
+
+process alumno () [id = 0 to 50]{
+    int grupo;
+    admin.llegada(grupo, id);
+    hacer_practica();
+    admin.terminar(grupo);
+}
+
+process jtp () {
+
+}
+
+monitor admin {
+    cond vcjtp, fila, vcgrupo[N];
+    int alumnos = 0, nro_grupo[N], grupo_terminado[24], terminados = 0;
+    int nota_grupo[N],nota = 25;
+    Queue cola;
+
+    process llegada(grupo: in int; id: in int) {
+        alumnos++;
+        if (alumnos == 50) {
+            signal(vcjtp);
+        }
+        wait(fila);
+        grupo = nro_grupo[id];
+    }
+
+    process entregar_numero() {
+        if (alumnos < 50) {
+            wait(vcjtp);
+        }
+        for (int i = 0; i < 50; i++) {
+            nro_grupo[i] = dar_numero();
+        }
+        signal_all(fila);
+    }
+
+    process terminar (grupo: in int; nota: out int) {
+        grupo_terminado[grupo - 1]++;
+        if (grupo_terminado[grupo - 1] == 2) {
+            terminados++;
+            push(cola, grupo);
+            signal(vcjtp)
+        }
+        wait(vcgrupo[grupo])
+        nota = nota_grupo[grupo - 1];
+    }
+
+    process entregar_nota () {
+        int grupo;
+        if (terminados == 0) {
+            wait(vcjtp)
+        } 
+        grupo = pop(cola) - 1;
+        nota_grupo[grupo] = nota;
+        nota--;
+        signal(vcgrupo[grupo]);
+    }
+}
