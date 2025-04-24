@@ -1,0 +1,106 @@
+1) Sentencias Await
+
+Descripción: Hay 5 filósofos, los filósofos toman tenedor, comen dejan tenedor, piensan y repiten. Cada filosofo necesita el tenedor de la derecha y de la izquierda.
+
+
+
+boolean tenedores[5] = ([5] true);
+
+process filosofo() [id= 0 to 4]{
+    
+    if (id == 0) {
+        <await (tenedores[id + 1] == true); tenedores[id + 1] = false;>;
+        <await (tenedores[id] == true); tenedores[id] = false;>;
+    } else {
+        <await (tenedores[id %  5] == true); tenedores[id % 5] = false;>;
+        <await (tenedores[(id + 1) %  5] == true); tenedores[(id + 1) % 5] = false;>;
+    }
+     comer();
+     tenedores[id] = true;
+     tenedores[(id + 1) % 5] = true;
+     pensar();
+}
+
+2) Semáforos
+
+Descripción: Tenemos una linea de producción compuesta por 4 carpinteros, 1 vidriero y 2 armadores. Los carpinteros hacen marcos continuamente y los guardan en deposito con
+capacidad para 30 marcos, el vidriero hace marcos continuamente y los guarda en deposito para 50 vidrios. Los armadores arman.
+
+sem marcos = 0, vidrios = 0, deposito_marcos = 30, deposito_vidrios = 50 ;
+
+process carpintero () [id = 0 to 3] {
+    while (true) {
+        P(deposito_marcos);
+        hacer_marco();
+        V(marcos);
+    }
+}
+
+process vidriero () {
+    while(true) {
+        P(deposito_vidrios);
+        hacer_vidrio();
+        V(vidrios);
+    }
+
+}
+
+process armadores () [id = 0 to 1] {
+    P(marcos);
+    V(deposito_marcos);
+    P(vidrios);
+    V(deposito_vidrios);
+    hacer_ventana();
+}
+
+3) Monitores
+
+Descripción: un recurso que puede ser usado por una persona a la vez. P personas que lo utilizan, en función de su prioridad, un admin aumenta la prioridad de todos cada 3hs
+
+
+process admin () {
+    while (true) {
+        _delay_hs(3);
+        recurso.actualizar_prioridad();
+    }
+}
+
+process persona () [id = 0 to P - 1] {
+    int prioridad  = ...;
+    recurso.llegada(id, prioridad)
+    videoconferencia();
+    recurso.liberar();
+}
+
+monitor recurso {
+    QueueOrdenada cola;
+    boolean libre = true
+    cond vcpersonas[P];
+
+    process llegada (id: in int; prioridad: in int) {
+        if (not libre) {
+            push(cola, id, prioridad);
+            wait(vcpersonas[id]);
+        } else {
+            libre = false;
+        }
+    }
+
+    process liberar () {
+        if (not empty(cola)) {
+            signal(vcpersonas[pop(cola)]);
+        } else {
+            libre = true;
+        }
+    }
+
+    process actualizar_prioridad () {
+        QueueOrdenada aux; 
+        while (not empty(cola)) {
+            pop(cola, id, prioridad);
+            prioridad++;
+            push(aux, id, prioridad);
+        }
+        cola = aux;
+    }
+}
