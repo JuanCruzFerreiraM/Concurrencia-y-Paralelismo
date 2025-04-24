@@ -1,0 +1,77 @@
+1) Semáforos
+
+Descripción: Maquina con capacidad para 100 latas, U usuarios, existe un repositor que repone las latas
+
+
+sem mutex = 1, aviso_repositor = 0, fin_reponer = 0, espera_turno[U] = ([U] 0);
+int latas = 100;
+boolean libre = true;
+Queue cola;
+
+process usuario () [id = 0 to U - 1] {
+    P(mutex);
+    if (not libre) {
+        push(cola, id);
+        V(mutex);
+        P(espera_turno[id]);
+    } else {
+        libre = false;
+        V(mutex);
+    }
+    if (latas == 0) {
+        V(aviso_repositor);
+        P(fin_reponer);
+    }
+
+    latas--;
+    P(mutex);
+    if (not empty(cola)) {
+        V(espera_turno[pop(cola)]);
+    } else {
+        libre = true;
+    }
+    V(mutex);
+}
+
+process repositor ( ) {
+    while (true) {
+        P(aviso_repositor);
+        latas = 100;
+        V(fin_reponer);
+    }
+}
+
+2) Monitores
+
+Descripción: 30 escaladores, paso para 1 por vez, de acuerdo al orden de llegada
+
+
+process escalador() [id = 0 to 29] {
+    paso.llegada(id);
+    cruzar();
+    paso.liberar();
+}
+
+monitor paso {
+    cond vcescaladores[30];
+    boolean libre = true;
+    Queue cola;
+
+    process llegada (id: in int) {
+        if ( not libre) {
+            push(cola, id);
+            wait(vcescaladores[id])
+        } else {
+            libre = false
+        }
+    }
+
+    process liberar() {
+        if (not empty(cola)) {
+            signal(vcescaladores[pop(cola)]);
+        } else {
+            libre = true;
+        }
+    }
+
+}
