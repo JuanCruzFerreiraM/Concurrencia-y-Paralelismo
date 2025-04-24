@@ -1,0 +1,122 @@
+1) Sentencias AWAIT 
+
+Descripción: Partido de futbol, se venden E entradas, P personas (P > E), forman una única fila. 5 ventanillas virtuales, atienden de acuerdo al orden de llegada. Si quedan 
+entradas se venden y se le da el numero a la persona, sino se les indica que no hay mas entradas (-1);
+
+
+int entradas = E, nro_entrada[P] = ([P] 0), personas = 0;
+int esperando = 0;
+Queue personas_esperando;
+
+
+process persona () [id = 0 to P - 1] {
+    int entrada;
+    <push(personas_esperando,id)>;
+    <await (nro_entrada[id] != 0); 
+    entrada = nro_entrada[id];
+    >;
+    
+    
+}
+
+process ventanilla () [id = 0 to 4] {
+    int id_persona;
+    while (true) {
+        <await (not empty(personas_esperando) or (personas == 0));
+        <if (personas == 0) {
+            break;
+        } else {
+            id_persona = pop(personas_esperando);
+            personas++;
+        }
+        >
+        < if (entradas > 0) {
+            entradas[id_persona] = personas;
+            entradas--;
+        } else {
+            entradas[id_persona] = -1;
+        }
+        >
+    }
+
+}
+
+2) Semáforos
+
+Descripción: N autos quieren pasar por un puente, deben hacerlo de a uno a la vez por orden de llegada. 
+
+sem mutex = 1, sem mutex_pasar[N] = ([N] 0);
+Queue cola, libre = true;
+
+
+process auto () [id = 0 to N-1] {
+    P(mutex)
+    if (libre == false ) {
+        esperando++;
+        push(cola,id);
+        V(mutex);
+        P(mutex_pasar[id]);
+    } else {
+        libre = false;
+        V(mutex);
+    }
+    Pasar();
+    P(mutex);
+    if (not empty(cola)) {
+        V(mutex_pasar[pop(cola)]);
+    } else {
+        libre = true;
+    }
+    V(mutex);
+}
+
+3) Monitores
+
+Descripción: 15 controladores y un modulo central. Los controladores miden cada cierto tiempo y envían a la central para que este les indique que deben hacer. Se atiende
+de acuerdo al orden de llegada.
+
+process controladores () [id = 0 to 14] {
+    float datos;
+    int acción;
+    while(true) {
+        medir(datos);
+        interface.entregar_datos(id,datos,acción);
+        actuar(acción);
+        _delayms(random() % 200);
+    }
+}
+
+process modulo_central () {
+  while(true) {
+    interface.indicar_acción();
+  }
+
+}
+
+monitor interface {
+    Queue cola;
+    cond vcmodulo, vccontrolador[15];
+    int esperando = 0, acciones[15];
+
+    process entregar_datos (id: in int;in_datos: in float; out_acción: out int) {
+        push(cola, id, in_datos)
+        esperando++
+        signal(vcmodulo)
+        wait(vccontrolador[id]);
+        out_acción = acciones[id];
+
+    }
+
+    process indicar_acción() {
+        int acción
+        if (esperando == 0) {
+            wait(vcmodulo);
+        }
+        pop(cola, id, datos);
+        acción = determinar(datos);
+        acciones[id] = acción;
+        signal(acciones[id]);
+    }
+
+
+}
