@@ -1,0 +1,142 @@
+1) Sentencias await
+
+Descripción: Debemos calcular el promedio de un vector de números con  100000 valores usando 10 workers, el resultado final debe ser guardado por todos los workers en variables
+locales.
+
+
+int vector[100000] = ...;
+int sum_total = 0;
+int cant_sumados  = 0;
+int terminaron = 0;
+
+process worker () [id = 0 to 9] {
+    int promedio;
+    int sum_parcial
+    for (int i = 10000*id; i < 10000*id + 10000; i++) {
+        sum_parcial += vector[i];
+    }
+    <sum_total += sum_parcial>;
+    <terminaron++>;
+    <
+    await (terminaron == 10);
+    promedio = sum_total / 100000;
+    >;
+}
+
+2) Semáforos
+
+Descripción: 3 cajeros, P personas, utilizan cajeros de acuerdo al orden de llegada. Solo proceso personas
+
+
+Queue cola, cajeros = {1, 2, 3};
+int esperando, libres = 3;
+sem mutex = 1, acceso[P] = ([P] 0), mutex_cajeros = 1;
+
+process persona () [id = 0 to P - 1] {
+    int numeroCajero;
+    P(mutex); 
+    if (libres == 0) {
+        push(cola, id);
+        V(mutex);
+        P(acceso[id]);
+   }  else  {
+        libres--;
+        V(mutex);
+   }
+   P(mutex_cajeros);
+   numeroCajero = pop(cajeros);
+   V(mutex_cajeros);
+   usaCajero(numeroCajero);
+   P(mutex_cajeros);
+   push(cajeros, numeroCajero);
+   V(mutex_cajeros);
+   P(mutex);
+   if (not empty(cola) ){
+        V(acceso[pop(cola)]);
+   } else {
+    libres++;
+   }
+   V(mutex);
+}
+
+
+3) Monitores 
+
+Descripción: C clientes atendidos por un laboratorio con 5 servidores, cliente entrega análisis servidor devuelve resultados. Por orden de llegada
+
+
+process cliente () [id = 0 to C - 1] {
+    int server;
+    File análisis = ...;
+    File resultado;
+    admin.llegada(id, server);
+    webInterface[server].pedir_resultados(análisis,resultado);
+};
+
+process servidor () [id = o  to 4] {
+    File análisis;
+    while(true) {
+        admin.siguiente(id);
+        webInterface[id].esperar_análisis(análisis);
+        webInterface[id].enviar_resultados(procesar(análisis);)
+    }
+}
+
+monitor admin {
+
+    int libre = 5, server_asignado[C], esperando = 0;
+    cond en_espera[C];
+    Queue cola, servers;
+
+    process llegada (id: in int; server_id: out int) {
+        if (libres == 0) {
+            push(cola, id);
+            wait(en_espera[id]);
+        } else {
+            libres--;
+        }
+
+        server_id = pop(servers);
+    }
+
+    process siguiente (id = in int) {
+        push(servers, id);
+        if (esperando > 0) {
+            esperando--;
+            signal(en_espera[pop(cola)]);
+        } else {
+            libre++;
+        }
+    }
+
+}
+
+monitor webInterface [id = 0 to 4]{
+    File a, r;
+    cond vccliente, vcservidor;
+    boolean listo = false;
+
+    process pedir_resultados (id_servidor: in int; análisis: in File; resultados: out File) {
+        a = análisis;
+        listo = true;
+        signal(vcservidor);
+        wait(vccliente);
+        r = resultados;
+        signal(vcservidor);
+    }
+
+    process esperar_análisis (análisis: out File) {
+        if (not listo) {
+            wait(vcservidor)
+        }
+        análisis = a;
+    }
+
+    process enviar_resultados (resultados: in File) {
+        r = resultados;
+        signal(vccliente);
+        wait(vcservidor);
+        listo = false;
+    }
+
+}
