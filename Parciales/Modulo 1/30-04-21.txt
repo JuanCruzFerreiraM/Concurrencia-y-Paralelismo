@@ -1,0 +1,58 @@
+1) Sentencias await
+
+Descripción: C corredores, una maquina expendedora, esperan a que lleguen los C corredores, al terminar acceden a la maquina toman una botella y se retiran.
+
+int corredores = 0, turno = -1;
+Queue cola;
+
+
+
+process corredor () [id = 0 to C - 1] {
+    <corredores++>
+    <await (corredores == C)>
+    correr();
+    <if (turno = -1) {
+        turno = id;
+    } else {
+        push(cola,id);
+    }>
+    <await turno == id;>
+    tomar botella; //A esta parte accede uno solo por el await, no es necesario usar <>
+    <if (not empty(cola)) {
+        turno = pop(cola);
+    } else {
+        turno = -1;
+    }>
+}
+
+2) Semáforos
+
+Descripción: 15 empleados forman grupos de 3. Grupos de acuerdo al orden de llegada. Cada grupo hace P unidades. Los empleados se deben retirar juntos por grupo.
+
+sem mutex = 1, trabajar[5] = ([5] 1), mutex_grupo[5] = ([5] 1), esperar[5] = ([5] 0);
+int cant = 0, productos_grupo[5] = ([5] 0), terminaron[grupo] = ([5] 0);
+
+process empleado () [id = 0 to 14] {
+    P(mutex);
+    int grupo = cant div 3; //div division que se queda con la parte entera. (0,1,2,3,4);
+    cant++;
+    V(mutex);
+    P(trabajar[grupo]);
+    while(productos_grupo[grupo] < P) {
+        V(trabajar[grupo]);
+        trabajar();
+        P(trabajar[grupo]);
+        productos_grupo[grupo]++;
+    }
+    V(trabajar[grupo]);
+    P(mutex_grupo(grupo));
+    terminaron[grupo]++;
+    if (terminaron[grupo] == 3) {
+        for (int i = 0; i < 3; i++) {
+            V(esperar[grupo]);
+        }
+    }
+    P(esperar[grupo]);
+
+}
+
