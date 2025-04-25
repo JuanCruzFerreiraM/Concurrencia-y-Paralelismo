@@ -1,0 +1,100 @@
+1) Sentencias Await 
+
+Descripción: Un empleado debe atender C clientes en orden de llegada. Entrega numero al cliente, Cliente imprime numero.
+
+
+int números[C], esperando = 0, turno  = - 1 ;
+Queue cola;
+
+process cliente () [id = 0 to C - 1] {
+    int numero;
+    <push(cola, id);>
+    <await (turno == id);>
+    numero = números[id];
+    <imprimir(numero)> //Suponiendo que la impresora es un recurso compartido
+}
+
+process empleado () {
+    int numero = 0;
+        while(true){
+        <await (not empty(cola));>
+        <int act = pop(cola);>
+        números[act] = numero;
+        numero++;
+        <turno = act;>
+    }
+}
+
+2) Semáforos
+
+Descripción: Examen, 1 docente y 50 alumno. Cuando todos los alumnos llegan comienza el examen. Alumnos terminan, entregan y esperan a que les devuelvan la nota.
+
+sem mutex = 1, iniciar_examen = 0, esperar_nota[50] = ([5] 0), profesor = 0; 
+int notas[50], 
+
+process alumno () [id = 0 to 49] {
+    int nota;
+    File examen
+    P(mutex);
+    esperando++;
+    if (esperando == 50) {
+        for(int i = 0; i < 49; i++) {
+            V(iniciar_examen);
+        }
+    }
+    V(mutex)
+    P(iniciar_examen);
+    hacer_examen(examen);
+    P(mutex);
+    push(cola, id, examen);
+    V(mutex);
+    V(profesor);
+    P(esperar_nota[id]);
+    nota = notas[id];
+
+}
+
+
+process docente () {
+    int aux;
+    File examen;
+    for (int i = 0; i < 49; i++) {
+        P(profesor);
+        P(mutex);
+        pop(cola, aux, examen);
+        V(mutex);
+        notas[aux] = corregir(examen);
+        V(esperar_nota[aux])
+    }
+}
+
+3) Monitores
+
+Descripción: Una impresora debe ser usada por orden de llegada por N personas una a la vez;
+
+process persona () [id = 0 to N - 1] {
+
+}
+
+monitor impresora {
+    Queue cola;
+    boolean libre;
+    cond vcpersona[N];
+
+    process usar(id: in int) {
+        if (not libre) {
+            push(cola, id);
+            wait(vcpersona[id]);
+        } else {
+            libre = false;
+        }
+    }
+
+    process liberar(id: in int) {
+        if (not empty(cola)) {
+            signal(vcpersona[pop(cola)]);
+        } else {
+            libre = true;
+        }
+    }
+}
